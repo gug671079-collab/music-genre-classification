@@ -1,0 +1,214 @@
+音乐风格自动分类系统 - 数据清洗日志 V2
+==================================================
+
+一、输入输出路径
+读取原始数据：data/raw/features_3_sec.csv
+输出清洗数据：data/processed/processed_features_3_sec_V2.csv
+输出清洗日志：logs/data_cleaning_summary.txt
+
+二、数据基本信息
+原始数据行数：9990
+原始数据列数：60
+必要字段检查：filename, label
+缺失的必要字段：无
+字段名：
+filename, length, chroma_stft_mean, chroma_stft_var, rms_mean, rms_var, spectral_centroid_mean, spectral_centroid_var, spectral_bandwidth_mean, spectral_bandwidth_var, rolloff_mean, rolloff_var, zero_crossing_rate_mean, zero_crossing_rate_var, harmony_mean, harmony_var, perceptr_mean, perceptr_var, tempo, mfcc1_mean, mfcc1_var, mfcc2_mean, mfcc2_var, mfcc3_mean, mfcc3_var, mfcc4_mean, mfcc4_var, mfcc5_mean, mfcc5_var, mfcc6_mean, mfcc6_var, mfcc7_mean, mfcc7_var, mfcc8_mean, mfcc8_var, mfcc9_mean, mfcc9_var, mfcc10_mean, mfcc10_var, mfcc11_mean, mfcc11_var, mfcc12_mean, mfcc12_var, mfcc13_mean, mfcc13_var, mfcc14_mean, mfcc14_var, mfcc15_mean, mfcc15_var, mfcc16_mean, mfcc16_var, mfcc17_mean, mfcc17_var, mfcc18_mean, mfcc18_var, mfcc19_mean, mfcc19_var, mfcc20_mean, mfcc20_var, label
+
+字段数据类型：
+filename                       str
+length                       int64
+chroma_stft_mean           float64
+chroma_stft_var            float64
+rms_mean                   float64
+rms_var                    float64
+spectral_centroid_mean     float64
+spectral_centroid_var      float64
+spectral_bandwidth_mean    float64
+spectral_bandwidth_var     float64
+rolloff_mean               float64
+rolloff_var                float64
+zero_crossing_rate_mean    float64
+zero_crossing_rate_var     float64
+harmony_mean               float64
+harmony_var                float64
+perceptr_mean              float64
+perceptr_var               float64
+tempo                      float64
+mfcc1_mean                 float64
+mfcc1_var                  float64
+mfcc2_mean                 float64
+mfcc2_var                  float64
+mfcc3_mean                 float64
+mfcc3_var                  float64
+mfcc4_mean                 float64
+mfcc4_var                  float64
+mfcc5_mean                 float64
+mfcc5_var                  float64
+mfcc6_mean                 float64
+mfcc6_var                  float64
+mfcc7_mean                 float64
+mfcc7_var                  float64
+mfcc8_mean                 float64
+mfcc8_var                  float64
+mfcc9_mean                 float64
+mfcc9_var                  float64
+mfcc10_mean                float64
+mfcc10_var                 float64
+mfcc11_mean                float64
+mfcc11_var                 float64
+mfcc12_mean                float64
+mfcc12_var                 float64
+mfcc13_mean                float64
+mfcc13_var                 float64
+mfcc14_mean                float64
+mfcc14_var                 float64
+mfcc15_mean                float64
+mfcc15_var                 float64
+mfcc16_mean                float64
+mfcc16_var                 float64
+mfcc17_mean                float64
+mfcc17_var                 float64
+mfcc18_mean                float64
+mfcc18_var                 float64
+mfcc19_mean                float64
+mfcc19_var                 float64
+mfcc20_mean                float64
+mfcc20_var                 float64
+label                          str
+
+三、缺失值检查
+filename                   0
+length                     0
+chroma_stft_mean           0
+chroma_stft_var            0
+rms_mean                   0
+rms_var                    0
+spectral_centroid_mean     0
+spectral_centroid_var      0
+spectral_bandwidth_mean    0
+spectral_bandwidth_var     0
+rolloff_mean               0
+rolloff_var                0
+zero_crossing_rate_mean    0
+zero_crossing_rate_var     0
+harmony_mean               0
+harmony_var                0
+perceptr_mean              0
+perceptr_var               0
+tempo                      0
+mfcc1_mean                 0
+mfcc1_var                  0
+mfcc2_mean                 0
+mfcc2_var                  0
+mfcc3_mean                 0
+mfcc3_var                  0
+mfcc4_mean                 0
+mfcc4_var                  0
+mfcc5_mean                 0
+mfcc5_var                  0
+mfcc6_mean                 0
+mfcc6_var                  0
+mfcc7_mean                 0
+mfcc7_var                  0
+mfcc8_mean                 0
+mfcc8_var                  0
+mfcc9_mean                 0
+mfcc9_var                  0
+mfcc10_mean                0
+mfcc10_var                 0
+mfcc11_mean                0
+mfcc11_var                 0
+mfcc12_mean                0
+mfcc12_var                 0
+mfcc13_mean                0
+mfcc13_var                 0
+mfcc14_mean                0
+mfcc14_var                 0
+mfcc15_mean                0
+mfcc15_var                 0
+mfcc16_mean                0
+mfcc16_var                 0
+mfcc17_mean                0
+mfcc17_var                 0
+mfcc18_mean                0
+mfcc18_var                 0
+mfcc19_mean                0
+mfcc19_var                 0
+mfcc20_mean                0
+mfcc20_var                 0
+label                      0
+
+四、label 类别分布
+label
+blues        1000
+classical     998
+country       997
+disco         999
+hiphop        998
+jazz         1000
+metal        1000
+pop          1000
+reggae       1000
+rock          998
+
+五、filename 信息提取
+新增字段：genre_from_filename、track_id、segment_id
+genre_from_filename 缺失数量：0
+track_id 缺失数量：0
+segment_id 缺失数量：0
+
+六、label 与 filename 中风格是否一致
+一致记录数：9990
+不一致记录数：0
+不一致样例：
+无
+
+七、track_id 与切片数量摘要
+track_id 总数：1000
+每个 track_id 的片段数量分布（片段数：track_id 数量）：
+segment_id
+9      10
+10    990
+
+八、重复值检查
+包含 filename 时的完整重复行数量：0
+用于检查“特征 + label”重复的字段：
+chroma_stft_mean, chroma_stft_var, rms_mean, rms_var, spectral_centroid_mean, spectral_centroid_var, spectral_bandwidth_mean, spectral_bandwidth_var, rolloff_mean, rolloff_var, zero_crossing_rate_mean, zero_crossing_rate_var, harmony_mean, harmony_var, perceptr_mean, perceptr_var, tempo, mfcc1_mean, mfcc1_var, mfcc2_mean, mfcc2_var, mfcc3_mean, mfcc3_var, mfcc4_mean, mfcc4_var, mfcc5_mean, mfcc5_var, mfcc6_mean, mfcc6_var, mfcc7_mean, mfcc7_var, mfcc8_mean, mfcc8_var, mfcc9_mean, mfcc9_var, mfcc10_mean, mfcc10_var, mfcc11_mean, mfcc11_var, mfcc12_mean, mfcc12_var, mfcc13_mean, mfcc13_var, mfcc14_mean, mfcc14_var, mfcc15_mean, mfcc15_var, mfcc16_mean, mfcc16_var, mfcc17_mean, mfcc17_var, mfcc18_mean, mfcc18_var, mfcc19_mean, mfcc19_var, mfcc20_mean, mfcc20_var, label
+排除 filename、genre_from_filename、track_id、segment_id、length 后的重复记录数量：133
+
+相同音频特征是否对应多个 label：
+存在多个 label 的相同音频特征组数量：10
+问题样例：
+         filename label genre_from_filename    track_id  segment_id
+metal.00058.0.wav metal               metal metal.00058           0
+metal.00058.1.wav metal               metal metal.00058           1
+metal.00058.2.wav metal               metal metal.00058           2
+metal.00058.3.wav metal               metal metal.00058           3
+metal.00058.4.wav metal               metal metal.00058           4
+metal.00058.5.wav metal               metal metal.00058           5
+metal.00058.6.wav metal               metal metal.00058           6
+metal.00058.7.wav metal               metal metal.00058           7
+metal.00058.8.wav metal               metal metal.00058           8
+metal.00058.9.wav metal               metal metal.00058           9
+ rock.00016.0.wav  rock                rock  rock.00016           0
+ rock.00016.1.wav  rock                rock  rock.00016           1
+ rock.00016.2.wav  rock                rock  rock.00016           2
+ rock.00016.3.wav  rock                rock  rock.00016           3
+ rock.00016.4.wav  rock                rock  rock.00016           4
+ rock.00016.5.wav  rock                rock  rock.00016           5
+ rock.00016.6.wav  rock                rock  rock.00016           6
+ rock.00016.7.wav  rock                rock  rock.00016           7
+ rock.00016.8.wav  rock                rock  rock.00016           8
+ rock.00016.9.wav  rock                rock  rock.00016           9
+
+九、去重结果
+去重前行数：9990
+去重后行数：9857
+删除重复行数：133
+
+十、最终输出数据
+最终输出行数：9857
+最终输出列数：63
+保留字段说明：保留 filename、track_id、segment_id，方便后续按音轨分组划分训练集和测试集。
+
+清洗完成。
