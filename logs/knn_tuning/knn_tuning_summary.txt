@@ -1,0 +1,118 @@
+KNN GroupKFold 调参实验
+==================================================
+
+一、数据路径
+读取数据：data/processed/processed_features_3_sec_V2.csv
+
+二、数据规模
+样本数量：9857
+track_id 数量：987
+
+三、类别分布
+label
+blues        1000
+classical     998
+country       997
+disco         989
+hiphop        978
+jazz         1000
+metal         930
+pop           980
+reggae        987
+rock          998
+
+四、字段处理
+目标变量：label
+分组字段：track_id
+删除的非模型字段：
+filename, genre_from_filename, track_id, segment_id, length
+
+五、验证方式
+使用的验证方式：GroupKFold(n_splits=5)
+主要评价指标：Macro-F1
+
+六、参数搜索范围
+{'model__n_neighbors': [1, 3, 5, 7, 9, 11, 15, 21, 31, 41], 'model__weights': ['uniform', 'distance'], 'model__p': [1, 2]}
+p=1 表示 Manhattan distance；p=2 表示 Euclidean distance。
+
+七、最优参数与分数
+最优参数：{'model__n_neighbors': 15, 'model__p': 1, 'model__weights': 'distance'}
+最优 mean_test_f1_macro：0.6931
+对应 std_test_f1_macro：0.0147
+对应 mean_test_accuracy：0.6921
+对应 mean_test_f1_weighted：0.6927
+
+八、排名前 10 的参数组合
+ rank_test_f1_macro  param_model__n_neighbors param_model__weights  param_model__p  mean_test_f1_macro  std_test_f1_macro  mean_test_accuracy  mean_test_f1_weighted
+                  1                        15             distance               1            0.693079           0.014730            0.692125               0.692739
+                  2                        11             distance               1            0.692101           0.015031            0.691111               0.691769
+                  3                        21             distance               1            0.691850           0.015928            0.690605               0.691424
+                  4                        31             distance               1            0.690996           0.014969            0.689589               0.690382
+                  5                        11              uniform               1            0.689263           0.016508            0.688477               0.688843
+                  6                        41             distance               1            0.688238           0.013689            0.686645               0.687514
+                  7                        15              uniform               1            0.688161           0.016545            0.687361               0.687768
+                  8                        21              uniform               1            0.687069           0.016515            0.685940               0.686552
+                  9                         9             distance               1            0.686004           0.014377            0.684922               0.685671
+                 10                        31              uniform               1            0.685321           0.013070            0.684209               0.684639
+
+九、OOF 预测结果
+OOF Accuracy：0.6921
+OOF Macro-F1：0.6937
+OOF Weighted-F1：0.6933
+
+十、每一折结果
+ fold  train_sample_count  validation_sample_count  train_track_count  validation_track_count  accuracy  macro_precision  macro_recall  f1_macro  f1_weighted
+    1                7888                     1969                790                     197  0.703911         0.707265      0.705466  0.702757     0.702176
+    2                7880                     1977                789                     198  0.673242         0.694457      0.672164  0.675699     0.676624
+    3                7882                     1975                789                     198  0.674937         0.682377      0.675609  0.674590     0.673428
+    4                7889                     1968                790                     197  0.705285         0.712255      0.703447  0.704702     0.705636
+    5                7889                     1968                790                     197  0.703252         0.716377      0.704827  0.707647     0.705832
+
+十一、每个类别的 OOF 指标
+    label  precision   recall  f1-score  support
+    blues   0.784922 0.708000  0.744479     1000
+classical   0.826840 0.956914  0.887134      998
+  country   0.594306 0.670010  0.629892      997
+    disco   0.521559 0.635996  0.573121      989
+   hiphop   0.706024 0.599182  0.648230      978
+     jazz   0.784865 0.726000  0.754286     1000
+    metal   0.830303 0.736559  0.780627      930
+      pop   0.805869 0.728571  0.765273      980
+   reggae   0.600196 0.622087  0.610945      987
+     rock   0.547401 0.538076  0.542698      998
+
+十二、最容易混淆的前 10 个类别对
+true_label predicted_label  count  row_normalized_ratio
+      rock           disco    141              0.141283
+     metal            rock    122              0.131183
+      jazz       classical    121              0.121000
+     disco            rock    113              0.114257
+    reggae          hiphop    110              0.111449
+    hiphop          reggae    107              0.109407
+    hiphop           disco     97              0.099182
+       pop           disco     93              0.094898
+      rock         country     93              0.093186
+     blues         country     92              0.092000
+
+十三、与 Baseline V2 结果的比较说明
+本实验结果不能直接和 Baseline V2 的片段级 train_test_split 结果简单比较。
+Baseline V2 使用 train_test_split(stratify=y)，可能存在同一首音乐的不同片段跨训练集和测试集的问题。
+本实验使用 GroupKFold，并以 track_id 分组，评估方式更严格，更接近未见歌曲的泛化表现。
+本实验应与 Baseline V3 GroupKFold 在同一评估框架下比较。Baseline V3 是固定参数 KNN，本实验是在相同 GroupKFold 设置下进行 KNN 参数搜索，因此两者可以用于展示 KNN 调参带来的性能变化。Baseline V2 使用片段级 train_test_split，可能结果偏乐观，不作为后续正式模型对比基准。
+
+十四、输出文件列表
+logs/knn_tuning/knn_tuning_results.csv
+logs/knn_tuning/knn_tuning_summary.txt
+logs/knn_tuning/knn_top_params.png
+logs/knn_tuning/knn_confusion_matrix.png
+logs/knn_tuning/knn_oof_predictions.csv
+logs/knn_tuning/knn_k_curve.png
+logs/knn_tuning/knn_param_heatmap_uniform.png
+logs/knn_tuning/knn_param_heatmap_distance.png
+logs/knn_tuning/knn_confusion_matrix_normalized.png
+logs/knn_tuning/knn_per_class_metrics.png
+logs/knn_tuning/knn_fold_scores.csv
+logs/knn_tuning/knn_fold_scores.png
+
+实验说明：本脚本只进行 KNN 调参，统一使用 GroupKFold 避免同一首音乐的片段跨训练折和验证折。
+实验完成。
