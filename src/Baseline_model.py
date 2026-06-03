@@ -5,7 +5,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score, classification_report
 
 # 读取数据
-df = pd.read_csv(r"D:\Music AI\music-genre-classification\data\processed\processed_features_3_sec.csv")
+df = pd.read_csv(r"C:\Users\Ttraveller\Desktop\python期末项目\music-genre-classification\data\processed\processed_features_3_sec.csv")
 
 target_column = 'label' # 标签列名
 X = df.drop(columns=[target_column]) # 特征数据
