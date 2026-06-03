@@ -1,0 +1,81 @@
+音乐风格自动分类系统 - 划分方式可靠性实验
+============================================================
+
+一、实验目的
+比较普通随机片段验证 StratifiedKFold 与按 track_id 分组验证 GroupKFold 的可靠性。
+重点观察内部验证 Macro F1、外部测试 Macro F1、optimism_gap 和 track_id 重叠比例。
+
+二、数据路径
+读取数据：data/processed/processed_features_3_sec_V2.csv
+
+三、字段处理
+目标变量：label
+分组字段：track_id
+删除的非模型字段：
+filename, genre_from_filename, track_id, segment_id, length
+
+四、final_test 划分方式
+先在 track_id 级别构建数据表，每个 track_id 只保留一条 label。
+再使用 train_test_split(test_size=0.2, random_state=42, stratify=track_table['label'])。
+final_test_track_ids 对应的所有 3 秒片段进入 final_test，其余进入 train_pool。
+final_test 不参与任何内部验证、模型选择或训练过程中的评估。
+
+五、样本数量
+train_pool 样本数量：7880
+final_test 样本数量：1977
+train_pool track_id 数量：789
+final_test track_id 数量：198
+
+六、类别分布
+train_pool 中每个类别的样本数量：
+label
+blues        800
+classical    798
+country      797
+disco        789
+hiphop       778
+jazz         800
+metal        750
+pop          780
+reggae       790
+rock         798
+
+final_test 中每个类别的样本数量：
+label
+blues        200
+classical    200
+country      200
+disco        200
+hiphop       200
+jazz         200
+metal        180
+pop          200
+reggae       197
+rock         200
+
+七、每个模型、每种验证方式的结果摘要
+       model validation_method  internal_cv_macro_f1_mean  internal_cv_macro_f1_std  cv_track_id_overlap_ratio_mean  cv_track_id_overlap_ratio_std  external_test_accuracy  external_test_macro_f1  optimism_gap
+         KNN   StratifiedKFold                   0.889396                  0.006765                             1.0                            0.0                0.645422                0.647841      0.241555
+         KNN        GroupKFold                   0.653869                  0.020097                             0.0                            0.0                0.645422                0.647841      0.006029
+     SVM_RBF   StratifiedKFold                   0.862604                  0.008325                             1.0                            0.0                0.723318                0.721394      0.141211
+     SVM_RBF        GroupKFold                   0.706217                  0.021120                             0.0                            0.0                0.723318                0.721394     -0.015176
+RandomForest   StratifiedKFold                   0.875411                  0.010214                             1.0                            0.0                0.693475                0.691395      0.184016
+RandomForest        GroupKFold                   0.683940                  0.030144                             0.0                            0.0                0.693475                0.691395     -0.007455
+
+八、结果说明
+optimism_gap = internal_cv_macro_f1_mean - external_test_macro_f1。
+如果 optimism_gap 较大，说明内部验证结果相对真实未见歌曲测试表现更偏乐观。
+cv_track_id_overlap_ratio_mean 表示验证折样本中 track_id 同时出现在训练折中的比例。
+StratifiedKFold 按 3 秒片段随机划分，可能出现同一首歌的不同片段跨训练折和验证折。
+GroupKFold 按 track_id 分组划分，理论上 track_id 重叠比例应为 0，更接近未见歌曲测试场景。
+
+九、输出文件
+文字日志：logs/split_reliability_experiment/split_reliability_summary.txt
+最终测试集 track_id：logs/split_reliability_experiment/final_test_track_ids.txt
+CSV 结果表：logs/split_reliability_experiment/split_reliability_results.csv
+内部/外部 F1 对比图：logs/split_reliability_experiment/split_reliability_internal_vs_external_f1.png
+optimism_gap 对比图：logs/split_reliability_experiment/split_reliability_optimism_gap.png
+track_id 重叠比例对比图：logs/split_reliability_experiment/split_reliability_track_overlap.png
+外部测试 Macro F1 对比图：logs/split_reliability_experiment/split_reliability_external_f1.png
+
+实验完成。
