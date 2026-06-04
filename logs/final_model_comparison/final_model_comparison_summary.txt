@@ -1,0 +1,108 @@
+最终模型横向对比
+==================================================
+
+一、实验说明
+三个模型均基于同一个 final_test 进行比较。
+本脚本不重新训练模型，只读取三个 V2 调参脚本已经生成的输出结果。
+最终模型选择主要依据 external_test_macro_f1，其次参考 accuracy 和各类别表现。
+
+二、总体对比表
+       model                                                                                                                                                                                  best_params  internal_cv_macro_f1_mean  internal_cv_macro_f1_std  internal_cv_accuracy_mean  internal_cv_weighted_f1_mean  external_test_accuracy  external_test_macro_f1
+         KNN                                                                                                  {'model__n_neighbors': np.int64(15), 'model__p': np.int64(1), 'model__weights': 'distance'}                   0.681044                  0.022728                   0.679800                      0.680986                0.662114                0.664047
+     SVM-RBF                                                                                                                                       {'model__C': np.float64(1.0), 'model__gamma': 'scale'}                   0.706217                  0.018891                   0.709639                      0.705713                0.723318                0.721394
+RandomForest {'model__max_depth': np.float64(20.0), 'model__max_features': 'sqrt', 'model__min_samples_leaf': np.int64(1), 'model__min_samples_split': np.int64(5), 'model__n_estimators': np.int64(300)}                   0.698048                  0.027401                   0.701378                      0.697363                0.697521                0.695985
+
+三、最佳模型判断
+最佳模型：SVM-RBF
+选择依据：SVM-RBF 的 external_test_macro_f1 最高；如分数接近，再参考 external_test_accuracy 和每类别表现是否均衡。
+
+四、各模型最佳参数与核心指标
+
+模型：KNN
+最佳参数：{'model__n_neighbors': np.int64(15), 'model__p': np.int64(1), 'model__weights': 'distance'}
+internal_cv_macro_f1_mean：0.6810
+external_test_accuracy：0.6621
+external_test_macro_f1：0.6640
+
+模型：SVM-RBF
+最佳参数：{'model__C': np.float64(1.0), 'model__gamma': 'scale'}
+internal_cv_macro_f1_mean：0.7062
+external_test_accuracy：0.7233
+external_test_macro_f1：0.7214
+
+模型：RandomForest
+最佳参数：{'model__max_depth': np.float64(20.0), 'model__max_features': 'sqrt', 'model__min_samples_leaf': np.int64(1), 'model__min_samples_split': np.int64(5), 'model__n_estimators': np.int64(300)}
+internal_cv_macro_f1_mean：0.6980
+external_test_accuracy：0.6975
+external_test_macro_f1：0.6960
+
+五、classification_report
+
+模型：KNN
+              precision    recall  f1-score   support
+
+       blues       0.81      0.67      0.73       200
+   classical       0.79      0.96      0.87       200
+     country       0.60      0.67      0.64       200
+       disco       0.45      0.48      0.46       200
+      hiphop       0.70      0.59      0.64       200
+        jazz       0.78      0.74      0.76       200
+       metal       0.83      0.66      0.73       180
+         pop       0.74      0.57      0.64       200
+      reggae       0.55      0.70      0.62       197
+        rock       0.51      0.58      0.54       200
+
+    accuracy                           0.66      1977
+   macro avg       0.68      0.66      0.66      1977
+weighted avg       0.68      0.66      0.66      1977
+
+
+模型：SVM-RBF
+              precision    recall  f1-score   support
+
+       blues       0.74      0.72      0.73       200
+   classical       0.85      0.95      0.90       200
+     country       0.67      0.74      0.70       200
+       disco       0.68      0.51      0.58       200
+      hiphop       0.74      0.66      0.69       200
+        jazz       0.76      0.84      0.80       200
+       metal       0.92      0.83      0.87       180
+         pop       0.68      0.70      0.69       200
+      reggae       0.62      0.77      0.69       197
+        rock       0.60      0.52      0.56       200
+
+    accuracy                           0.72      1977
+   macro avg       0.73      0.72      0.72      1977
+weighted avg       0.72      0.72      0.72      1977
+
+
+模型：RandomForest
+              precision    recall  f1-score   support
+
+       blues       0.75      0.70      0.72       200
+   classical       0.90      0.95      0.92       200
+     country       0.66      0.71      0.68       200
+       disco       0.61      0.50      0.55       200
+      hiphop       0.71      0.56      0.63       200
+        jazz       0.70      0.84      0.77       200
+       metal       0.83      0.77      0.80       180
+         pop       0.71      0.66      0.69       200
+      reggae       0.58      0.75      0.65       197
+        rock       0.56      0.54      0.55       200
+
+    accuracy                           0.70      1977
+   macro avg       0.70      0.70      0.70      1977
+weighted avg       0.70      0.70      0.70      1977
+
+
+六、输出文件列表
+logs/final_model_comparison/final_model_comparison_results.csv
+logs/final_model_comparison/final_model_comparison_summary.txt
+logs/final_model_comparison/final_model_comparison_barplot.png
+logs/final_model_comparison/internal_vs_external_macro_f1.png
+logs/final_model_comparison/per_class_recall_comparison.png
+logs/final_model_comparison/per_class_f1_comparison.png
+logs/final_model_comparison/best_model_confusion_matrix.png
+logs/final_model_comparison/best_model_confusion_matrix_normalized.png
+
+对比完成。

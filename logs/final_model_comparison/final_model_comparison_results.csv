@@ -1,0 +1,4 @@
+model,best_params,internal_cv_macro_f1_mean,internal_cv_macro_f1_std,internal_cv_accuracy_mean,internal_cv_weighted_f1_mean,external_test_accuracy,external_test_macro_f1
+KNN,"{'model__n_neighbors': np.int64(15), 'model__p': np.int64(1), 'model__weights': 'distance'}",0.6810436721534391,0.0227275471511162,0.6798002968044351,0.6809856995801106,0.6621143146181082,0.6640467770585297
+SVM-RBF,"{'model__C': np.float64(1.0), 'model__gamma': 'scale'}",0.7062174116350828,0.0188906378258325,0.7096385343934136,0.7057129772159829,0.7233181588265049,0.7213937879896638
+RandomForest,"{'model__max_depth': np.float64(20.0), 'model__max_features': 'sqrt', 'model__min_samples_leaf': np.int64(1), 'model__min_samples_split': np.int64(5), 'model__n_estimators': np.int64(300)}",0.6980475646862712,0.0274008290758964,0.7013775673084286,0.6973633196668212,0.697521497218007,0.6959847545606643
