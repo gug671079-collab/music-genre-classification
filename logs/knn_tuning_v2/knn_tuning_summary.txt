@@ -1,0 +1,140 @@
+KNN GroupKFold 调参实验 V2
+==================================================
+
+一、实验设置
+读取数据：data/processed/processed_features_3_sec_V2.csv
+共享 final_test_track_ids：logs/final_test_track_ids.txt
+本实验先以 track_id 为单位固定 20% final_test。
+GridSearchCV 只在剩余 80% train_pool 内部进行。
+final_test 不参与参数选择，只用于最终评估。
+因此 final_test 分数可以用于三个模型之间的最终横向比较。
+
+二、数据规模
+train_pool 样本数量：7880
+train_pool track_id 数量：789
+final_test 样本数量：1977
+final_test track_id 数量：198
+
+三、字段处理
+目标变量：label
+分组字段：track_id
+删除的非模型字段：
+filename, genre_from_filename, track_id, segment_id, length
+
+四、内部调参结果
+验证方式：GroupKFold(n_splits=5)
+主要评价指标：Macro-F1
+参数搜索范围：{'model__n_neighbors': [1, 3, 5, 7, 9, 11, 15, 21, 31, 41], 'model__weights': ['uniform', 'distance'], 'model__p': [1, 2]}
+最佳参数：{'model__n_neighbors': 15, 'model__p': 1, 'model__weights': 'distance'}
+best mean_test_f1_macro：0.6810
+std_test_f1_macro：0.0227
+mean_test_accuracy：0.6798
+mean_test_f1_weighted：0.6810
+
+五、排名前 10 的参数组合
+ rank_test_f1_macro  param_model__n_neighbors param_model__weights  param_model__p  mean_test_f1_macro  std_test_f1_macro  mean_test_accuracy  mean_test_f1_weighted
+                  1                        15             distance               1            0.681044           0.022728            0.679800               0.680986
+                  2                        21             distance               1            0.680071           0.026854            0.678531               0.679827
+                  3                        11             distance               1            0.679684           0.023503            0.678401               0.679289
+                  4                        41             distance               1            0.677647           0.030627            0.676876               0.677260
+                  5                         9             distance               1            0.677638           0.023334            0.676116               0.677433
+                  6                        31             distance               1            0.677389           0.032102            0.675856               0.676930
+                  7                        15              uniform               1            0.676942           0.025275            0.676117               0.676831
+                  8                        21              uniform               1            0.676839           0.028362            0.675863               0.676596
+                  9                        11              uniform               1            0.674760           0.026830            0.674340               0.674372
+                 10                         7             distance               1            0.673820           0.022836            0.672052               0.673758
+
+六、train_pool 内部 OOF 结果
+OOF Accuracy：0.6798
+OOF Macro F1：0.6816
+OOF classification_report：
+              precision    recall  f1-score   support
+
+       blues       0.76      0.69      0.73       800
+   classical       0.82      0.95      0.88       798
+     country       0.55      0.63      0.59       797
+       disco       0.56      0.64      0.59       789
+      hiphop       0.71      0.58      0.64       778
+        jazz       0.76      0.71      0.73       800
+       metal       0.82      0.71      0.76       750
+         pop       0.80      0.74      0.77       780
+      reggae       0.61      0.60      0.60       790
+        rock       0.50      0.55      0.52       798
+
+    accuracy                           0.68      7880
+   macro avg       0.69      0.68      0.68      7880
+weighted avg       0.69      0.68      0.68      7880
+
+OOF 每类指标：
+    label  precision   recall  f1-score  support
+    blues   0.764787 0.695000  0.728225      800
+classical   0.820346 0.949875  0.880372      798
+  country   0.547437 0.629862  0.585764      797
+    disco   0.557650 0.637516  0.594914      789
+   hiphop   0.706250 0.580977  0.637518      778
+     jazz   0.764547 0.706250  0.734243      800
+    metal   0.820000 0.710667  0.761429      750
+      pop   0.800830 0.742308  0.770459      780
+   reggae   0.605128 0.597468  0.601274      790
+     rock   0.497722 0.547619  0.521480      798
+OOF 每折结果：
+ fold  train_sample_count  validation_sample_count  train_track_count  validation_track_count  accuracy  macro_precision  macro_recall  f1_macro  f1_weighted
+    1                6302                     1578                631                     158  0.657161         0.664510      0.656525  0.653568     0.655906
+    2                6302                     1578                631                     158  0.714195         0.727985      0.716188  0.718400     0.716124
+    3                6302                     1578                631                     158  0.690748         0.699825      0.692583  0.692899     0.691113
+    4                6311                     1569                632                     157  0.660931         0.677510      0.660930  0.664909     0.664095
+    5                6303                     1577                631                     158  0.675967         0.682558      0.674643  0.675442     0.677690
+
+七、final_test 外部测试结果
+external_test_accuracy：0.6621
+external_test_macro_f1：0.6640
+final_test classification_report：
+              precision    recall  f1-score   support
+
+       blues       0.81      0.67      0.73       200
+   classical       0.79      0.96      0.87       200
+     country       0.60      0.67      0.64       200
+       disco       0.45      0.48      0.46       200
+      hiphop       0.70      0.59      0.64       200
+        jazz       0.78      0.74      0.76       200
+       metal       0.83      0.66      0.73       180
+         pop       0.74      0.57      0.64       200
+      reggae       0.55      0.70      0.62       197
+        rock       0.51      0.58      0.54       200
+
+    accuracy                           0.66      1977
+   macro avg       0.68      0.66      0.66      1977
+weighted avg       0.68      0.66      0.66      1977
+
+final_test confusion_matrix：
+                pred_blues  pred_classical  pred_country  pred_disco  pred_hiphop  pred_jazz  pred_metal  pred_pop  pred_reggae  pred_rock
+true_blues             133               0            25           3            1          5           1         0           28          4
+true_classical           0             192             3           0            0          3           0         0            0          2
+true_country            13               9           134           8            0          8           1         1           13         13
+true_disco               0              10            15          96           28          2           7        10            5         27
+true_hiphop              6               0             3          23          118          0           9         9           26          6
+true_jazz                8              25             8           4            0        149           0         0            3          3
+true_metal               3               0             2           9            4          0         119         0            3         40
+true_pop                 0               0             8          41            5          6           0       114           18          8
+true_reggae              0               0            11          14           11          0           2        11          137         11
+true_rock                2               6            13          16            1         17           5         9           14        117
+
+八、输出文件列表
+logs/final_test_track_ids.txt
+logs/knn_tuning_v2/knn_tuning_results.csv
+logs/knn_tuning_v2/knn_tuning_summary.txt
+logs/knn_tuning_v2/knn_top_params.png
+logs/knn_tuning_v2/knn_k_curve.png
+logs/knn_tuning_v2/knn_param_heatmap_uniform.png
+logs/knn_tuning_v2/knn_param_heatmap_distance.png
+logs/knn_tuning_v2/knn_confusion_matrix.png
+logs/knn_tuning_v2/knn_confusion_matrix_normalized.png
+logs/knn_tuning_v2/knn_per_class_metrics.png
+logs/knn_tuning_v2/knn_fold_scores.csv
+logs/knn_tuning_v2/knn_fold_scores.png
+logs/knn_tuning_v2/knn_oof_predictions.csv
+logs/knn_tuning_v2/knn_final_test_predictions.csv
+logs/knn_tuning_v2/knn_final_test_confusion_matrix.png
+logs/knn_tuning_v2/knn_final_test_confusion_matrix_normalized.png
+
+实验完成。

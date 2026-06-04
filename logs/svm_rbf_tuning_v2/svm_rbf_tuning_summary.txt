@@ -1,0 +1,138 @@
+SVM-RBF GroupKFold 调参实验 V2
+==================================================
+
+一、实验设置
+读取数据：data/processed/processed_features_3_sec_V2.csv
+共享 final_test_track_ids：logs/final_test_track_ids.txt
+本实验先以 track_id 为单位固定 20% final_test。
+GridSearchCV 只在剩余 80% train_pool 内部进行。
+final_test 不参与参数选择，只用于最终评估。
+因此 final_test 分数可以用于三个模型之间的最终横向比较。
+
+二、数据规模
+train_pool 样本数量：7880
+train_pool track_id 数量：789
+final_test 样本数量：1977
+final_test track_id 数量：198
+
+三、字段处理
+目标变量：label
+分组字段：track_id
+删除的非模型字段：
+filename, genre_from_filename, track_id, segment_id, length
+
+四、内部调参结果
+验证方式：GroupKFold(n_splits=5)
+主要评价指标：Macro-F1
+参数搜索范围：{'model__C': [0.1, 1, 10, 100], 'model__gamma': ['scale', 0.001, 0.01, 0.1, 1]}
+最佳参数：{'model__C': 1, 'model__gamma': 'scale'}
+best mean_test_f1_macro：0.7062
+std_test_f1_macro：0.0189
+mean_test_accuracy：0.7096
+mean_test_f1_weighted：0.7057
+
+五、排名前 10 的参数组合
+ rank_test_f1_macro  param_model__C param_model__gamma  mean_test_f1_macro  std_test_f1_macro  mean_test_accuracy  mean_test_f1_weighted
+                  1             1.0              scale            0.706217           0.018891            0.709639               0.705713
+                  2            10.0              scale            0.705882           0.021188            0.708624               0.705508
+                  3            10.0               0.01            0.704700           0.026162            0.708124               0.704435
+                  4             1.0               0.01            0.700411           0.021210            0.703037               0.699848
+                  5           100.0              scale            0.699124           0.017348            0.702152               0.698721
+                  6           100.0               0.01            0.692962           0.021954            0.695812               0.692702
+                  7           100.0              0.001            0.686154           0.023288            0.688183               0.685864
+                  8            10.0              0.001            0.679056           0.021776            0.681208               0.678373
+                  9             0.1              scale            0.627988           0.019439            0.635916               0.627177
+                 10           100.0                0.1            0.626681           0.018997            0.627803               0.626206
+
+六、train_pool 内部 OOF 结果
+OOF Accuracy：0.7096
+OOF Macro F1：0.7078
+OOF classification_report：
+              precision    recall  f1-score   support
+
+       blues       0.70      0.75      0.73       800
+   classical       0.83      0.94      0.88       798
+     country       0.66      0.71      0.68       797
+       disco       0.64      0.63      0.64       789
+      hiphop       0.72      0.62      0.67       778
+        jazz       0.77      0.80      0.78       800
+       metal       0.79      0.77      0.78       750
+         pop       0.77      0.77      0.77       780
+      reggae       0.68      0.60      0.64       790
+        rock       0.52      0.51      0.51       798
+
+    accuracy                           0.71      7880
+   macro avg       0.71      0.71      0.71      7880
+weighted avg       0.71      0.71      0.71      7880
+
+OOF 每类指标：
+    label  precision   recall  f1-score  support
+    blues   0.701979 0.753750  0.726944      800
+classical   0.827434 0.937343  0.878966      798
+  country   0.656542 0.705144  0.679976      797
+    disco   0.644243 0.631179  0.637644      789
+   hiphop   0.722222 0.618252  0.666205      778
+     jazz   0.769231 0.800000  0.784314      800
+    metal   0.791553 0.774667  0.783019      750
+      pop   0.771613 0.766667  0.769132      780
+   reggae   0.675637 0.603797  0.637701      790
+     rock   0.521290 0.506266  0.513668      798
+OOF 每折结果：
+ fold  train_sample_count  validation_sample_count  train_track_count  validation_track_count  accuracy  macro_precision  macro_recall  f1_macro  f1_weighted
+    1                6302                     1578                631                     158  0.687579         0.685785      0.687751  0.680857     0.681747
+    2                6302                     1578                631                     158  0.740811         0.743963      0.742718  0.738693     0.736619
+    3                6302                     1578                631                     158  0.711027         0.709832      0.715248  0.709016     0.705560
+    4                6311                     1569                632                     157  0.704908         0.715877      0.705031  0.705100     0.704424
+    5                6303                     1577                631                     158  0.703868         0.699064      0.701861  0.697421     0.700215
+
+七、final_test 外部测试结果
+external_test_accuracy：0.7233
+external_test_macro_f1：0.7214
+final_test classification_report：
+              precision    recall  f1-score   support
+
+       blues       0.74      0.72      0.73       200
+   classical       0.85      0.95      0.90       200
+     country       0.67      0.74      0.70       200
+       disco       0.68      0.51      0.58       200
+      hiphop       0.74      0.66      0.69       200
+        jazz       0.76      0.84      0.80       200
+       metal       0.92      0.83      0.87       180
+         pop       0.68      0.70      0.69       200
+      reggae       0.62      0.77      0.69       197
+        rock       0.60      0.52      0.56       200
+
+    accuracy                           0.72      1977
+   macro avg       0.73      0.72      0.72      1977
+weighted avg       0.72      0.72      0.72      1977
+
+final_test confusion_matrix：
+                pred_blues  pred_classical  pred_country  pred_disco  pred_hiphop  pred_jazz  pred_metal  pred_pop  pred_reggae  pred_rock
+true_blues             145               0            24           3            0          9           1         0           17          1
+true_classical           0             191             2           0            0          7           0         0            0          0
+true_country            25               1           149           0            0         11           0         0            3         11
+true_disco               0               8             4         101           27          4           3        13           13         27
+true_hiphop              7               0             0           5          131          0           2        14           38          3
+true_jazz                9              19             2           1            0        168           0         0            0          1
+true_metal               5               2             2           3            4          1         149         0            0         14
+true_pop                 0               0            11          24            4          2           0       141           15          3
+true_reggae              1               0             7           8            9          1           1        10          151          9
+true_rock                5               4            23           3            3         17           6        29            6        104
+
+八、输出文件列表
+logs/final_test_track_ids.txt
+logs/svm_rbf_tuning_v2/svm_rbf_tuning_results.csv
+logs/svm_rbf_tuning_v2/svm_rbf_tuning_summary.txt
+logs/svm_rbf_tuning_v2/svm_rbf_top_params.png
+logs/svm_rbf_tuning_v2/svm_rbf_param_heatmap.png
+logs/svm_rbf_tuning_v2/svm_rbf_confusion_matrix.png
+logs/svm_rbf_tuning_v2/svm_rbf_confusion_matrix_normalized.png
+logs/svm_rbf_tuning_v2/svm_rbf_per_class_metrics.png
+logs/svm_rbf_tuning_v2/svm_rbf_fold_scores.csv
+logs/svm_rbf_tuning_v2/svm_rbf_fold_scores.png
+logs/svm_rbf_tuning_v2/svm_rbf_oof_predictions.csv
+logs/svm_rbf_tuning_v2/svm_rbf_final_test_predictions.csv
+logs/svm_rbf_tuning_v2/svm_rbf_final_test_confusion_matrix.png
+logs/svm_rbf_tuning_v2/svm_rbf_final_test_confusion_matrix_normalized.png
+
+实验完成。

@@ -1,0 +1,139 @@
+RandomForest GroupKFold 调参实验 V2
+==================================================
+
+一、实验设置
+读取数据：data/processed/processed_features_3_sec_V2.csv
+共享 final_test_track_ids：logs/final_test_track_ids.txt
+本实验先以 track_id 为单位固定 20% final_test。
+GridSearchCV 只在剩余 80% train_pool 内部进行。
+final_test 不参与参数选择，只用于最终评估。
+因此 final_test 分数可以用于三个模型之间的最终横向比较。
+FAST_MODE：False
+
+二、数据规模
+train_pool 样本数量：7880
+train_pool track_id 数量：789
+final_test 样本数量：1977
+final_test track_id 数量：198
+
+三、字段处理
+目标变量：label
+分组字段：track_id
+删除的非模型字段：
+filename, genre_from_filename, track_id, segment_id, length
+
+四、内部调参结果
+验证方式：GroupKFold(n_splits=5)
+主要评价指标：Macro-F1
+参数搜索范围：{'model__n_estimators': [100, 200, 300], 'model__max_depth': [None, 10, 20], 'model__max_features': ['sqrt', 'log2'], 'model__min_samples_split': [2, 5], 'model__min_samples_leaf': [1, 2]}
+最佳参数：{'model__max_depth': 20, 'model__max_features': 'sqrt', 'model__min_samples_leaf': 1, 'model__min_samples_split': 5, 'model__n_estimators': 300}
+best mean_test_f1_macro：0.6980
+std_test_f1_macro：0.0274
+mean_test_accuracy：0.7014
+mean_test_f1_weighted：0.6974
+
+五、排名前 10 的参数组合
+ rank_test_f1_macro  param_model__n_estimators param_model__max_depth param_model__max_features  param_model__min_samples_split  param_model__min_samples_leaf  mean_test_f1_macro  std_test_f1_macro  mean_test_accuracy  mean_test_f1_weighted
+                  1                        300                     20                      sqrt                               5                              1            0.698048           0.027401            0.701378               0.697363
+                  2                        200                     20                      sqrt                               5                              1            0.697308           0.027006            0.700736               0.696563
+                  3                        300                   None                      sqrt                               5                              1            0.696928           0.023687            0.700227               0.696312
+                  4                        300                     20                      sqrt                               2                              1            0.696470           0.027537            0.699847               0.695866
+                  5                        300                   None                      sqrt                               5                              2            0.695221           0.025162            0.699089               0.694543
+                  6                        200                   None                      sqrt                               5                              1            0.694903           0.026349            0.698071               0.694206
+                  7                        300                     20                      sqrt                               5                              2            0.694012           0.024595            0.697692               0.693448
+                  8                        200                     20                      sqrt                               2                              1            0.693124           0.026369            0.696424               0.692500
+                  9                        200                   None                      sqrt                               5                              2            0.693063           0.024199            0.696681               0.692342
+                 10                        300                   None                      sqrt                               2                              1            0.692508           0.027102            0.696172               0.691798
+
+六、train_pool 内部 OOF 结果
+OOF Accuracy：0.7014
+OOF Macro F1：0.6993
+OOF classification_report：
+              precision    recall  f1-score   support
+
+       blues       0.76      0.75      0.75       800
+   classical       0.87      0.92      0.89       798
+     country       0.59      0.68      0.63       797
+       disco       0.64      0.61      0.62       789
+      hiphop       0.69      0.59      0.64       778
+        jazz       0.75      0.81      0.78       800
+       metal       0.76      0.81      0.78       750
+         pop       0.76      0.76      0.76       780
+      reggae       0.64      0.62      0.63       790
+        rock       0.53      0.48      0.50       798
+
+    accuracy                           0.70      7880
+   macro avg       0.70      0.70      0.70      7880
+weighted avg       0.70      0.70      0.70      7880
+
+OOF 每类指标：
+    label  precision   recall  f1-score  support
+    blues   0.760814 0.747500  0.754098      800
+classical   0.871581 0.918546  0.894448      798
+  country   0.593647 0.680050  0.633918      797
+    disco   0.639519 0.607098  0.622887      789
+   hiphop   0.691154 0.592545  0.638062      778
+     jazz   0.745958 0.807500  0.775510      800
+    metal   0.758794 0.805333  0.781371      750
+      pop   0.755076 0.762821  0.758929      780
+   reggae   0.642951 0.617722  0.630084      790
+     rock   0.532867 0.477444  0.503635      798
+OOF 每折结果：
+ fold  train_sample_count  validation_sample_count  train_track_count  validation_track_count  accuracy  macro_precision  macro_recall  f1_macro  f1_weighted
+    1                6302                     1578                631                     158  0.675539         0.670533      0.674056  0.667612     0.669055
+    2                6302                     1578                631                     158  0.750951         0.751591      0.753222  0.748849     0.747054
+    3                6302                     1578                631                     158  0.702788         0.703660      0.708275  0.699382     0.695165
+    4                6311                     1569                632                     157  0.686424         0.700377      0.686664  0.689397     0.688750
+    5                6303                     1577                631                     158  0.691186         0.685344      0.690242  0.684997     0.686793
+
+七、final_test 外部测试结果
+external_test_accuracy：0.6975
+external_test_macro_f1：0.6960
+final_test classification_report：
+              precision    recall  f1-score   support
+
+       blues       0.75      0.70      0.72       200
+   classical       0.90      0.95      0.92       200
+     country       0.66      0.71      0.68       200
+       disco       0.61      0.50      0.55       200
+      hiphop       0.71      0.56      0.63       200
+        jazz       0.70      0.84      0.77       200
+       metal       0.83      0.77      0.80       180
+         pop       0.71      0.66      0.69       200
+      reggae       0.58      0.75      0.65       197
+        rock       0.56      0.54      0.55       200
+
+    accuracy                           0.70      1977
+   macro avg       0.70      0.70      0.70      1977
+weighted avg       0.70      0.70      0.70      1977
+
+final_test confusion_matrix：
+                pred_blues  pred_classical  pred_country  pred_disco  pred_hiphop  pred_jazz  pred_metal  pred_pop  pred_reggae  pred_rock
+true_blues             140               0            20          10            0          5           7         0           17          1
+true_classical           0             190             1           0            0          8           0         0            1          0
+true_country            19               1           142           0            0         22           0         1            4         11
+true_disco               1               3            14         100           28          5           4        12           14         19
+true_hiphop              5               0             2          12          113          0           4        18           42          4
+true_jazz               11              14             3           2            0        169           0         1            0          0
+true_metal               3               1             1           2            4          0         138         0            0         31
+true_pop                 0               0            18          21            5          1           0       132           14          9
+true_reggae              0               2             5          10            9          2           1        10          147         11
+true_rock                8               0             9           8            0         29          12        11           15        108
+
+八、输出文件列表
+logs/final_test_track_ids.txt
+logs/random_forest_tuning_v2/random_forest_tuning_results.csv
+logs/random_forest_tuning_v2/random_forest_tuning_summary.txt
+logs/random_forest_tuning_v2/random_forest_top_params.png
+logs/random_forest_tuning_v2/random_forest_param_effects.png
+logs/random_forest_tuning_v2/random_forest_confusion_matrix.png
+logs/random_forest_tuning_v2/random_forest_confusion_matrix_normalized.png
+logs/random_forest_tuning_v2/random_forest_per_class_metrics.png
+logs/random_forest_tuning_v2/random_forest_fold_scores.csv
+logs/random_forest_tuning_v2/random_forest_fold_scores.png
+logs/random_forest_tuning_v2/random_forest_oof_predictions.csv
+logs/random_forest_tuning_v2/random_forest_final_test_predictions.csv
+logs/random_forest_tuning_v2/random_forest_final_test_confusion_matrix.png
+logs/random_forest_tuning_v2/random_forest_final_test_confusion_matrix_normalized.png
+
+实验完成。
