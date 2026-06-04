@@ -1,0 +1,120 @@
+RandomForest GroupKFold 调参实验
+==================================================
+
+一、实验目的
+在与 KNN、SVM-RBF 调参相同的数据处理、分组方式、交叉验证方式和评价指标下，对 RandomForest 进行参数搜索。
+本实验使用完整数据集，不额外划分 final_test，主要评价指标为 Macro-F1。
+
+二、数据路径
+读取数据：data/processed/processed_features_3_sec_V2.csv
+
+三、数据规模
+样本数量：9857
+track_id 数量：987
+
+四、类别分布
+label
+blues        1000
+classical     998
+country       997
+disco         989
+hiphop        978
+jazz         1000
+metal         930
+pop           980
+reggae        987
+rock          998
+
+五、字段处理
+目标变量：label
+分组字段：track_id
+删除的非模型字段：
+filename, genre_from_filename, track_id, segment_id, length
+
+六、模型与验证方式
+使用的模型：RandomForestClassifier
+验证方式：GroupKFold(n_splits=5)
+主要评价指标：Macro-F1
+RandomForestClassifier 设置 random_state=42；GridSearchCV 使用 n_jobs=-1，模型内部不额外设置 n_jobs，避免嵌套并行。
+
+七、参数搜索范围
+{'model__n_estimators': [100, 200, 300], 'model__max_depth': [None, 10, 20], 'model__max_features': ['sqrt', 'log2'], 'model__min_samples_split': [2, 5], 'model__min_samples_leaf': [1, 2]}
+n_estimators 控制森林中决策树数量；max_depth 控制单棵树最大深度；max_features 控制每次分裂时考虑的特征数量；min_samples_split 控制内部节点继续分裂所需的最小样本数；min_samples_leaf 控制叶节点所需的最小样本数。
+
+八、最优参数与分数
+最优参数：{'model__max_depth': None, 'model__max_features': 'sqrt', 'model__min_samples_leaf': 1, 'model__min_samples_split': 5, 'model__n_estimators': 300}
+最优 mean_test_f1_macro：0.7056
+对应 std_test_f1_macro：0.0093
+对应 mean_test_accuracy：0.7081
+对应 mean_test_f1_weighted：0.7049
+
+九、排名前 10 的参数组合
+ rank_test_f1_macro  param_model__n_estimators param_model__max_depth param_model__max_features  param_model__min_samples_split  param_model__min_samples_leaf  mean_test_f1_macro  std_test_f1_macro  mean_test_accuracy  mean_test_f1_weighted
+                  1                        300                   None                      sqrt                               5                              1            0.705619           0.009320            0.708124               0.704922
+                  2                        300                     20                      sqrt                               5                              1            0.705467           0.010558            0.707930               0.704819
+                  3                        200                     20                      sqrt                               5                              1            0.702879           0.011049            0.705290               0.702175
+                  4                        300                   None                      sqrt                               2                              1            0.701897           0.012430            0.704281               0.701223
+                  5                        300                     20                      sqrt                               2                              1            0.701886           0.011767            0.704477               0.701270
+                  6                        300                   None                      sqrt                               2                              2            0.701407           0.012064            0.703964               0.700674
+                  7                        300                   None                      log2                               2                              1            0.701259           0.011016            0.703970               0.700641
+                  8                        300                     20                      sqrt                               5                              2            0.701179           0.006244            0.703966               0.700362
+                  9                        200                     20                      sqrt                               2                              1            0.701152           0.013893            0.703563               0.700478
+                 10                        200                   None                      sqrt                               5                              1            0.700873           0.008760            0.703463               0.700149
+
+十、最优参数下 OOF 总体结果
+OOF Accuracy：0.7081
+OOF Macro Precision：0.7052
+OOF Macro Recall：0.7086
+OOF Macro-F1：0.7056
+OOF Weighted-F1：0.7052
+
+十一、每一折结果表
+ fold  train_sample_count  validation_sample_count  train_track_count  validation_track_count  accuracy  macro_precision  macro_recall  f1_macro  f1_weighted
+    1                7888                     1969                790                     197  0.707466         0.713403      0.708770  0.705631     0.705212
+    2                7880                     1977                789                     198  0.706626         0.705483      0.706335  0.704267     0.704417
+    3                7882                     1975                789                     198  0.713418         0.710872      0.714496  0.710297     0.708860
+    4                7889                     1968                790                     197  0.692581         0.688657      0.692946  0.689720     0.689544
+    5                7889                     1968                790                     197  0.720528         0.720495      0.722559  0.718183     0.716575
+
+十二、每个类别的 OOF 指标
+    label  precision   recall  f1-score  support
+    blues   0.749499 0.748000  0.748749     1000
+classical   0.874532 0.935872  0.904163      998
+  country   0.608311 0.690070  0.646617      997
+    disco   0.614961 0.565217  0.589041      989
+   hiphop   0.714454 0.621677  0.664844      978
+     jazz   0.759470 0.802000  0.780156     1000
+    metal   0.781282 0.825806  0.802927      930
+      pop   0.729835 0.766327  0.747636      980
+   reggae   0.642930 0.640324  0.641624      987
+     rock   0.577150 0.490982  0.530590      998
+
+十三、最容易混淆的前 10 个类别对
+true_label predicted_label  count  row_normalized_ratio
+     disco            rock    118              0.119312
+      rock         country    113              0.113226
+    hiphop          reggae    110              0.112474
+      rock           disco    107              0.107214
+    hiphop             pop     97              0.099182
+      jazz       classical     90              0.090000
+     disco          hiphop     86              0.086957
+      rock           metal     84              0.084168
+     blues         country     83              0.083000
+     metal            rock     80              0.086022
+
+十四、与 Baseline V3、KNN 调参和 SVM-RBF 调参的比较说明
+本实验与 Baseline V3、KNN 调参、SVM-RBF 调参实验保持相同的数据输入、字段处理方式、Pipeline 结构、GroupKFold 分组方式和主要评价指标，因此可以用于后续模型横向比较。Baseline V3 是固定参数 KNN，KNN 调参、SVM-RBF 调参和本实验分别在相同评估框架下搜索各自模型的关键参数。
+
+十五、输出文件列表
+logs/random_forest_tuning/random_forest_tuning_results.csv
+logs/random_forest_tuning/random_forest_tuning_summary.txt
+logs/random_forest_tuning/random_forest_top_params.png
+logs/random_forest_tuning/random_forest_param_effects.png
+logs/random_forest_tuning/random_forest_confusion_matrix.png
+logs/random_forest_tuning/random_forest_confusion_matrix_normalized.png
+logs/random_forest_tuning/random_forest_per_class_metrics.png
+logs/random_forest_tuning/random_forest_fold_scores.csv
+logs/random_forest_tuning/random_forest_fold_scores.png
+logs/random_forest_tuning/random_forest_oof_predictions.csv
+
+实验完成。

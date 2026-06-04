@@ -1,0 +1,119 @@
+SVM-RBF GroupKFold 调参实验
+==================================================
+
+一、实验目的
+在与 KNN 调参相同的数据处理、分组方式、交叉验证方式和评价指标下，对 SVM-RBF 进行参数搜索。
+本实验使用完整数据集，不额外划分 final_test，主要评价指标为 Macro-F1。
+
+二、数据路径
+读取数据：data/processed/processed_features_3_sec_V2.csv
+
+三、数据规模
+样本数量：9857
+track_id 数量：987
+
+四、类别分布
+label
+blues        1000
+classical     998
+country       997
+disco         989
+hiphop        978
+jazz         1000
+metal         930
+pop           980
+reggae        987
+rock          998
+
+五、字段处理
+目标变量：label
+分组字段：track_id
+删除的非模型字段：
+filename, genre_from_filename, track_id, segment_id, length
+
+六、模型与验证方式
+使用的模型：SVC(kernel="rbf")
+验证方式：GroupKFold(n_splits=5)
+主要评价指标：Macro-F1
+
+七、参数搜索范围
+{'model__C': [0.1, 1, 10, 100], 'model__gamma': ['scale', 0.001, 0.01, 0.1, 1]}
+C 控制正则化强度；gamma 控制 RBF 核函数中样本影响范围。
+
+八、最优参数与分数
+最优参数：{'model__C': 10, 'model__gamma': 'scale'}
+最优 mean_test_f1_macro：0.7243
+对应 std_test_f1_macro：0.0200
+对应 mean_test_accuracy：0.7268
+对应 mean_test_f1_weighted：0.7238
+
+九、排名前 10 的参数组合
+ rank_test_f1_macro  param_model__C param_model__gamma  mean_test_f1_macro  std_test_f1_macro  mean_test_accuracy  mean_test_f1_weighted
+                  1            10.0              scale            0.724350           0.020008            0.726827               0.723784
+                  2            10.0               0.01            0.722851           0.012674            0.724687               0.722208
+                  3             1.0              scale            0.720742           0.010075            0.722753               0.719939
+                  4           100.0              scale            0.716650           0.023378            0.719120               0.716207
+                  5             1.0               0.01            0.714563           0.007484            0.716357               0.713813
+                  6           100.0               0.01            0.713873           0.022588            0.716280               0.713370
+                  7           100.0              0.001            0.705483           0.007108            0.706818               0.704643
+                  8            10.0              0.001            0.686505           0.009469            0.688448               0.685610
+                  9            10.0                0.1            0.650470           0.024212            0.649519               0.649617
+                  9           100.0                0.1            0.650470           0.024212            0.649519               0.649617
+
+十、最优参数下 OOF 总体结果
+OOF Accuracy：0.7268
+OOF Macro Precision：0.7246
+OOF Macro Recall：0.7270
+OOF Macro-F1：0.7246
+OOF Weighted-F1：0.7243
+
+十一、每一折结果表
+ fold  train_sample_count  validation_sample_count  train_track_count  validation_track_count  accuracy  macro_precision  macro_recall  f1_macro  f1_weighted
+    1                7888                     1969                790                     197  0.736922         0.740953      0.738082  0.735446     0.735084
+    2                7880                     1977                789                     198  0.712190         0.715165      0.711765  0.711003     0.711287
+    3                7882                     1975                789                     198  0.696709         0.691385      0.697633  0.691449     0.690464
+    4                7889                     1968                790                     197  0.744411         0.744632      0.744217  0.742176     0.741936
+    5                7889                     1968                790                     197  0.743902         0.742631      0.745726  0.741676     0.740150
+
+十二、每个类别的 OOF 指标
+    label  precision   recall  f1-score  support
+    blues   0.745192 0.775000  0.759804     1000
+classical   0.819298 0.935872  0.873714      998
+  country   0.678733 0.752257  0.713606      997
+    disco   0.628543 0.627907  0.628225      989
+   hiphop   0.714446 0.652352  0.681988      978
+     jazz   0.798395 0.796000  0.797196     1000
+    metal   0.812227 0.800000  0.806067      930
+      pop   0.745763 0.763265  0.754413      980
+   reggae   0.699223 0.638298  0.667373      987
+     rock   0.604119 0.529058  0.564103      998
+
+十三、最容易混淆的前 10 个类别对
+true_label predicted_label  count  row_normalized_ratio
+    reggae          hiphop    103              0.104357
+      rock           disco    102              0.102204
+     disco            rock    100              0.101112
+      jazz       classical     98              0.098000
+      rock         country     91              0.091182
+    hiphop          reggae     89              0.091002
+    hiphop             pop     76              0.077710
+      rock           blues     59              0.059118
+    hiphop           disco     58              0.059305
+     disco             pop     58              0.058645
+
+十四、与 Baseline V3 和 KNN 调参的比较说明
+本实验与 Baseline V3、KNN 调参实验保持相同的数据输入、字段处理方式、标准化流程、GroupKFold 分组方式和主要评价指标，因此可以用于后续模型横向比较。Baseline V3 是固定参数 KNN，本实验是在相同评估框架下对 SVM-RBF 的 C 和 gamma 进行参数搜索。
+
+十五、输出文件列表
+logs/svm_rbf_tuning/svm_rbf_tuning_results.csv
+logs/svm_rbf_tuning/svm_rbf_tuning_summary.txt
+logs/svm_rbf_tuning/svm_rbf_top_params.png
+logs/svm_rbf_tuning/svm_rbf_param_heatmap.png
+logs/svm_rbf_tuning/svm_rbf_confusion_matrix.png
+logs/svm_rbf_tuning/svm_rbf_confusion_matrix_normalized.png
+logs/svm_rbf_tuning/svm_rbf_per_class_metrics.png
+logs/svm_rbf_tuning/svm_rbf_fold_scores.csv
+logs/svm_rbf_tuning/svm_rbf_fold_scores.png
+logs/svm_rbf_tuning/svm_rbf_oof_predictions.csv
+
+实验完成。

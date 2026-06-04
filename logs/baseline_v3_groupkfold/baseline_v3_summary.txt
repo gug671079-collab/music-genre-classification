@@ -1,0 +1,114 @@
+音乐风格自动分类系统 - Baseline V3 GroupKFold
+============================================================
+
+一、实验目的
+实现一个更严格、更公平的未调参 KNN baseline。
+该 baseline 使用 track_id 分组的 GroupKFold，用于后续调参模型的对照。
+
+二、数据路径
+读取数据：data/processed/processed_features_3_sec_V2.csv
+
+三、数据规模
+样本数量：9857
+track_id 数量：987
+
+四、类别分布
+label
+blues        1000
+classical     998
+country       997
+disco         989
+hiphop        978
+jazz         1000
+metal         930
+pop           980
+reggae        987
+rock          998
+
+五、字段处理
+目标变量：label
+分组字段：track_id
+删除的非模型字段：
+filename, genre_from_filename, track_id, segment_id, length
+
+六、模型设置
+使用的模型：KNN
+KNN 固定参数：{'n_neighbors': 5, 'weights': 'uniform', 'metric': 'minkowski', 'p': 2}
+说明：本 baseline 不进行调参，不使用 GridSearchCV，不搜索最优参数。
+
+七、验证方式
+验证方式：GroupKFold(n_splits=5)
+分组字段：track_id
+
+八、Baseline V3 与 Baseline V2 的区别
+Baseline V3 与 Baseline V2 的主要区别在于评估方式。Baseline V2 使用片段级 train_test_split，可能存在同一首音乐的不同片段跨训练集和测试集的问题，因此结果可能偏乐观。Baseline V3 使用 GroupKFold，并以 track_id 为分组单位，能够保证同一首音乐的所有片段不会同时出现在训练折和验证折中，因此更适合作为后续调参实验的基准结果。
+
+九、5 折每折结果表
+ fold  train_sample_count  validation_sample_count  train_track_count  validation_track_count  accuracy  macro_precision  macro_recall  macro_f1  weighted_f1
+    1                7888                     1969                790                     197  0.677501         0.680648      0.678449  0.676505     0.676282
+    2                7880                     1977                789                     198  0.644917         0.671625      0.643880  0.647738     0.648439
+    3                7882                     1975                789                     198  0.642532         0.645468      0.643170  0.640389     0.639503
+    4                7889                     1968                790                     197  0.679370         0.683668      0.678755  0.678231     0.678371
+    5                7889                     1968                790                     197  0.684959         0.692858      0.687123  0.686776     0.684764
+
+十、OOF 总体指标
+Accuracy：0.6658
+Macro Precision：0.6726
+Macro Recall：0.6659
+Macro F1：0.6665
+Weighted F1：0.6661
+
+十一、classification_report
+              precision    recall  f1-score   support
+
+       blues       0.71      0.74      0.72      1000
+   classical       0.81      0.91      0.86       998
+     country       0.56      0.63      0.60       997
+       disco       0.49      0.64      0.56       989
+      hiphop       0.64      0.58      0.61       978
+        jazz       0.76      0.69      0.73      1000
+       metal       0.81      0.72      0.76       930
+         pop       0.77      0.68      0.72       980
+      reggae       0.60      0.59      0.60       987
+        rock       0.57      0.47      0.52       998
+
+    accuracy                           0.67      9857
+   macro avg       0.67      0.67      0.67      9857
+weighted avg       0.67      0.67      0.67      9857
+
+
+十二、confusion matrix 数值结果
+                pred_blues  pred_classical  pred_country  pred_disco  pred_hiphop  pred_jazz  pred_metal  pred_pop  pred_reggae  pred_rock
+true_blues             736              10            82          26           12         29          32         1           48         24
+true_classical           7             909            14           2            0         59           1         1            1          4
+true_country            68              30           629          84           13         37           4        16           65         51
+true_disco              35               5            49         636           69         21          23        30           40         81
+true_hiphop             40               4            36          87          566          5          43        70          109         18
+true_jazz               37             116            87          23            3        695           3         9           12         15
+true_metal              27               1            18          71           31          0         666         0           12        104
+true_pop                 6               9            41         111           58         13           0       665           46         31
+true_reggae             22               4            61          81          116         17          15        59          587         25
+true_rock               64              30            99         166           21         38          36        18           52        474
+
+十三、最容易混淆的前 10 个类别对
+true_label predicted_label  count  row_normalized_ratio
+      rock           disco    166              0.166333
+    reggae          hiphop    116              0.117528
+      jazz       classical    116              0.116000
+       pop           disco    111              0.113265
+    hiphop          reggae    109              0.111452
+     metal            rock    104              0.111828
+      rock         country     99              0.099198
+    hiphop           disco     87              0.088957
+      jazz         country     87              0.087000
+   country           disco     84              0.084253
+
+十四、输出文件列表
+logs/baseline_v3_groupkfold/baseline_v3_summary.txt
+logs/baseline_v3_groupkfold/baseline_v3_oof_predictions.csv
+logs/baseline_v3_groupkfold/baseline_v3_fold_scores.csv
+logs/baseline_v3_groupkfold/baseline_v3_confusion_matrix.png
+logs/baseline_v3_groupkfold/baseline_v3_confusion_matrix_normalized.png
+logs/baseline_v3_groupkfold/baseline_v3_per_class_metrics.png
+
+实验完成。
