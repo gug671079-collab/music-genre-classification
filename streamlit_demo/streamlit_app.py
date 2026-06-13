@@ -20,6 +20,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 APP_DIR = Path(__file__).resolve().parent
 REFERENCE_CSV = PROJECT_ROOT / "data" / "processed" / "processed_features_3_sec.csv"
 ASSET_DIR = APP_DIR / "assets"
+FAVICON_IMG = ASSET_DIR / "ilisten_favicon.png"
 MONKEY_IMG = ASSET_DIR / "listen_meme_01.jpg"
 ENJOY_IMG = ASSET_DIR / "listen_meme_enjoy.jpg"
 CAT_IMG = ASSET_DIR / "listen_meme_cat.jpg"
@@ -40,7 +41,7 @@ GENRE_NAMES = {
 }
 
 
-st.set_page_config(page_title="iListen 我听歌", page_icon="iL", layout="wide")
+st.set_page_config(page_title="iListen 我听歌", page_icon=str(FAVICON_IMG), layout="wide")
 
 
 def inject_css() -> None:
