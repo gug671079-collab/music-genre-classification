@@ -1,0 +1,30 @@
+{
+  "purpose": "Inference artifact for the Streamlit course demo.",
+  "warning": "This artifact is trained from the repository feature CSV for demonstration. Replace it with the final team model when available.",
+  "source_csv": "C:\\Users\\abd\\Desktop\\PTH\\repo_tmp_music_genre\\data\\processed\\processed_features_3_sec.csv",
+  "row_count": 9990,
+  "feature_count": 57,
+  "class_names": [
+    "blues",
+    "classical",
+    "country",
+    "disco",
+    "hiphop",
+    "jazz",
+    "metal",
+    "pop",
+    "reggae",
+    "rock"
+  ],
+  "dropped_columns": [
+    "length"
+  ],
+  "model": "Pipeline(StandardScaler, SVC-RBF)",
+  "params": {
+    "kernel": "rbf",
+    "C": 1.0,
+    "gamma": "scale",
+    "probability": true,
+    "random_state": 42
+  }
+}
