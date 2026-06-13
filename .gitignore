@@ -3,4 +3,5 @@ data/raw/images_original
 __pycache__/
 *.py[cod]
 .streamlit/
-streamlit_demo/local_samples/
+streamlit_demo/local_samples/*
+!streamlit_demo/local_samples/kaerou_30s.wav
